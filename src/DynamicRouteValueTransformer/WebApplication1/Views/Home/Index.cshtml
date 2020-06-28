@@ -1,0 +1,26 @@
+﻿@model List<Starwars.Jedis.Entities.Jedi>
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Dynamic Route Value Transformer</h1>
+    <p>Using dynamic routing. Simple example map route dynamic to controller/action</p>
+</div>
+
+<div class="text-left">
+    <h2 class="display-4">Jedis</h2>
+    <hr />
+    <dl class="row">
+
+        @foreach (var jedi in Model)
+        {
+            <dt class="col-sm-4">
+                <a href="/jedi/@jedi.Endpoint" title="@jedi.Name">@jedi.Name</a>
+            </dt>
+            <dd class="col-sm-6">
+                <a href="/jedi/@jedi.Endpoint" title="@jedi.Name">Details: /jedi/@jedi.Endpoint</a>
+            </dd>
+        }
+    </dl>
+</div>
