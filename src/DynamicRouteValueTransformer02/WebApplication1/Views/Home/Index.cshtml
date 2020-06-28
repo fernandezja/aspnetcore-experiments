@@ -1,0 +1,33 @@
+﻿@model WebApplication1.ViewModels.HomeViewModel
+@{
+    ViewData["Title"] = "Home Page";
+    var language = "en";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Dynamic Route Value Transformer</h1>
+    <p>Using dynamic routing. Simple example map route dynamic to controller/action</p>
+</div>
+
+<div class="text-left">
+    <h2 class="display-4">Jedis</h2>
+    <hr />
+    <dl class="row">
+
+        @foreach (var jedi in Model.Jedis)
+        {
+            <dt class="col-sm-4">
+                <a href="/jedi/@jedi.Endpoint" title="@jedi.Name">@jedi.Name</a>
+            </dt>
+            <dd class="col-sm-6">
+                @foreach (var group in Model.Groups.Where(g => g.Language == language).ToList())
+                {
+                    <text>
+                    <a href="/@language/@group.Endpoint/@jedi.Endpoint" title="@jedi.Name">@group.Value</a>  | 
+                    </text>
+                }
+
+            </dd>
+        }
+    </dl>
+</div>
