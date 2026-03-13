@@ -1,34 +1,16 @@
-using Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation;
-using Microsoft.Extensions.FileProviders;
-
 var builder = WebApplication.CreateBuilder(args);
 
+var sharedComponentsAssembly = typeof(SharedComponents.Controllers.JediController).Assembly;
 
-// Add services to the container.
-builder.Services.AddControllersWithViews();
-
-
-//
-var assembly = typeof(SharedComponents.Controllers.JediController).Assembly;
-builder.Services.AddControllersWithViews()
-                .AddApplicationPart(assembly)
-                .AddRazorRuntimeCompilation();
-
-builder.Services.Configure<MvcRazorRuntimeCompilationOptions>(
-    options => { 
-        options.FileProviders.Add(new EmbeddedFileProvider(assembly)); 
-    });
-
-
-
+builder.Services
+    .AddControllersWithViews()
+    .AddApplicationPart(sharedComponentsAssembly);
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 

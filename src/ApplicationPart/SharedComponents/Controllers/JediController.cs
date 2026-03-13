@@ -1,12 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 
-namespace SharedComponents.Controllers
+namespace SharedComponents.Controllers;
+
+public class JediController : Controller
 {
-    public class JediController : Controller
+    public IActionResult Index()
     {
-        public IActionResult Index()
-        {
-            return View();
-        }
+        return View();
     }
 }
