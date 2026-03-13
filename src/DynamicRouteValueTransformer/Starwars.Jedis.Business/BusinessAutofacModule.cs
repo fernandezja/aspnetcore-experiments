@@ -1,23 +1,18 @@
-﻿using Autofac;
-using System;
-using System.Collections.Generic;
+using Autofac;
 using System.Reflection;
-using System.Text;
 
-namespace Starwars.Jedis.Business
+namespace Starwars.Jedis.Business;
+
+public class BusinessAutofacModule : Autofac.Module
 {
-    public class BusinessAutofacModule: Autofac.Module
+    protected override void Load(ContainerBuilder builder)
     {
-        protected override void Load(ContainerBuilder builder)
-        {
-
-            builder.RegisterAssemblyTypes(typeof(JediBusiness).GetTypeInfo().Assembly)
+        builder.RegisterAssemblyTypes(typeof(JediBusiness).GetTypeInfo().Assembly)
                .Where(t => t.Name.EndsWith("Business"))
                .AsImplementedInterfaces()
                .InstancePerDependency();
 
-            builder.RegisterType<JediFactory>()
-                .InstancePerDependency();
-        }
+        builder.RegisterType<JediFactory>()
+            .InstancePerDependency();
     }
 }

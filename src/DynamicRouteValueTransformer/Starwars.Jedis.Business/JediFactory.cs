@@ -1,28 +1,21 @@
-﻿using Starwars.Jedis.Entities;
-using System;
-using System.Collections.Generic;
-using System.Text;
+using Starwars.Jedis.Entities;
 
-namespace Starwars.Jedis.Business
+namespace Starwars.Jedis.Business;
+
+public class JediFactory
 {
-    public class JediFactory
+    public Jedi? Jedi { get; private set; }
+
+    public JediFactory() { }
+
+    public JediFactory(Jedi jedi)
     {
-        public Jedi Jedi { get; private set; }
+        Jedi = jedi;
+    }
 
-
-        public JediFactory()
-        {
-        }
-
-        public JediFactory(Jedi jedi)
-        {
-            Jedi = jedi;
-        }
-
-        public JediFactory SetJedi(Jedi jedi)
-        {
-            Jedi = jedi;
-            return this;
-        }
-}
+    public JediFactory SetJedi(Jedi jedi)
+    {
+        Jedi = jedi;
+        return this;
+    }
 }
