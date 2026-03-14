@@ -1,35 +1,42 @@
 var builder = WebApplication.CreateBuilder(args);
 var app = builder.Build();
 
-//app.MapGet("/", () => "Hello World!");
+if (app.Environment.IsDevelopment())
+{
+    app.UseDeveloperExceptionPage();
+}
+else
+{
+    app.UseExceptionHandler("/Error");
+    app.UseHsts();
+}
 
-//app.UseResponseCaching();
-//app.UseResponseCompression();
+app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.Use(async (context, next) =>
 {
     Console.WriteLine("Middleware 1.Start");
-    await next.Invoke();
+    await next(context);
     Console.WriteLine("Middleware 1.End");
 });
 
 app.Use(async (context, next) =>
 {
     Console.WriteLine("Middleware 2.Start");
-    await next.Invoke();
+    await next(context);
     Console.WriteLine("Middleware 2.End");
 });
 
 app.Map("/maptest1", HandleMapTest1);
 
-app.MapWhen(context => context.Request.Query.ContainsKey("demo1"), 
-                      HandleDemo1Request);
+app.MapWhen(
+    context => context.Request.Query.ContainsKey("demo1"),
+    HandleDemo1Request);
 
-app.UseWhen(context => context.Request.Query.ContainsKey("demo2"),
-            appBuilder => HandleDemo2Request(appBuilder));
-
-
+app.UseWhen(
+    context => context.Request.Query.ContainsKey("demo2"),
+    appBuilder => HandleDemo2Request(appBuilder));
 
 app.Run(async context =>
 {
@@ -37,8 +44,6 @@ app.Run(async context =>
 });
 
 app.Run();
-
-
 
 static void HandleMapTest1(IApplicationBuilder app)
 {
@@ -48,12 +53,11 @@ static void HandleMapTest1(IApplicationBuilder app)
     });
 }
 
-
 static void HandleDemo1Request(IApplicationBuilder app)
 {
     app.Run(async context =>
     {
-        var demoValue = context.Request.Query["demo1"];
+        var demoValue = context.Request.Query["demo1"].ToString();
         await context.Response.WriteAsync($"Demo1 value = {demoValue}");
     });
 }
@@ -64,11 +68,9 @@ void HandleDemo2Request(IApplicationBuilder app)
 
     app.Use(async (context, next) =>
     {
-        var demoValue = context.Request.Query["demo2"];
-        logger.LogInformation("Demo2 value = {demo2}", demoValue);
+        var demoValue = context.Request.Query["demo2"].ToString();
+        logger.LogInformation("Demo2 value = {Demo2}", demoValue);
 
-        // Do work that doesn't write to the Response.
-        await next();
-        // Do other work that doesn't write to the Response.
+        await next(context);
     });
 }
