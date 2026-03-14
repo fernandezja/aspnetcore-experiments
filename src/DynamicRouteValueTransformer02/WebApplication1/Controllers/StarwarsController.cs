@@ -1,73 +1,74 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Starwars.Jedis.Business.Interfaces;
 using Starwars.Jedis.Entities;
 
-namespace WebApplication1.Controllers
+namespace WebApplication1.Controllers;
+
+public class StarwarsController(
+    IJediBusiness jediBusiness,
+    IItemLocalizerBusiness itemLocalizerBusiness) : Controller
 {
-    public class StarwarsController : Controller
+    public IActionResult JediDetails(int id)
     {
-        private IJediBusiness _jediBusiness;
-        private IItemLocalizerBusiness _itemLocalizerBusiness;
-
-        public StarwarsController(IJediBusiness jediBusiness,
-                                  IItemLocalizerBusiness itemLocalizerBusiness)
+        if (id <= 0)
         {
-            _jediBusiness = jediBusiness;
-            _itemLocalizerBusiness = itemLocalizerBusiness;
+            return BadRequest();
         }
 
-        public IActionResult JediDetails(int id)
+        var jedi = jediBusiness.GetById(id);
+        if (jedi is null)
         {
-            if (id <= 0)
-            {
-                return BadRequest();
-            }
-
-            var jedi = _jediBusiness.GetById(id);
-
-            return View(jedi);
+            return View(nameof(JediNotFound));
         }
 
-        public IActionResult JediNotFound()
+        return View(jedi);
+    }
+
+    public IActionResult JediNotFound()
+    {
+        return View();
+    }
+
+    public IActionResult GroupNotFound()
+    {
+        return View();
+    }
+
+    public IActionResult GroupDetails(string language, string itemKey, int jediId)
+    {
+        if (string.IsNullOrWhiteSpace(language))
         {
-            return View();
+            return BadRequest();
         }
 
-        public IActionResult GroupNotFound()
+        if (string.IsNullOrWhiteSpace(itemKey))
         {
-            return View();
+            return BadRequest();
         }
 
-        public IActionResult GroupDetails(string language, string itemKey, int jediId)
+        if (jediId <= 0)
         {
-            if (string.IsNullOrEmpty(language))
-            {
-                return BadRequest();
-            }
-
-            if (string.IsNullOrEmpty(itemKey))
-            {
-                return BadRequest();
-            }
-
-            if (jediId <= 0)
-            {
-                return BadRequest();
-            }
-
-            var itemLocalizable = _itemLocalizerBusiness.GetByKey(language, itemKey);
-            var jedi = _jediBusiness.GetById(jediId);
-
-            var group = new Group() {
-                ItemLocalizable = itemLocalizable,
-                Jedi = jedi
-            };
-
-            return View(group);
+            return BadRequest();
         }
+
+        var itemLocalizable = itemLocalizerBusiness.GetByKey(language, itemKey);
+        if (itemLocalizable is null)
+        {
+            return View(nameof(GroupNotFound));
+        }
+
+        var jedi = jediBusiness.GetById(jediId);
+        if (jedi is null)
+        {
+            return View(nameof(JediNotFound));
+        }
+
+        var group = new Group
+        {
+            ItemLocalizable = itemLocalizable,
+            Jedi = jedi
+        };
+
+        return View(group);
     }
 }

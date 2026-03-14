@@ -1,14 +1,13 @@
-﻿using Starwars.Jedis.Entities;
-using System;
 using System.Collections.Generic;
-using System.Text;
+using Starwars.Jedis.Entities;
 
-namespace Starwars.Jedis.Business.Interfaces
+namespace Starwars.Jedis.Business.Interfaces;
+
+public interface IJediBusiness
 {
-    public interface IJediBusiness
-    {
-        List<Jedi> List();
-        Jedi GetByEndpoint(string jediEndpoint);
-        Jedi GetById(int id);
-    }
+    List<Jedi> List();
+
+    Jedi? GetByEndpoint(string jediEndpoint);
+
+    Jedi? GetById(int id);
 }

@@ -1,52 +1,36 @@
-﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.AspNetCore.Routing;
 using Starwars.Jedis.Business.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
-namespace WebApplication1.Code
+namespace WebApplication1.Code;
+
+public class StarwarsDynamicRouteValueTransformer(IJediBusiness jediBusiness) : DynamicRouteValueTransformer
 {
-    public class StarwarsDynamicRouteValueTransformer : DynamicRouteValueTransformer
+    public override ValueTask<RouteValueDictionary> TransformAsync(HttpContext httpContext,
+                                                                   RouteValueDictionary values)
     {
-        private IJediBusiness _jediBusiness;
+        var jediEndpoint = values["jediendpoint"] as string;
 
-        public StarwarsDynamicRouteValueTransformer(IJediBusiness jediBusiness)
+        if (string.IsNullOrEmpty(jediEndpoint))
+            return new ValueTask<RouteValueDictionary>(new RouteValueDictionary());
+
+        var jedi = jediBusiness.GetByEndpoint(jediEndpoint);
+
+        if (jedi is null)
         {
-            _jediBusiness = jediBusiness;
-        }
-
-        public override ValueTask<RouteValueDictionary> TransformAsync(HttpContext httpContext, 
-                                                                       RouteValueDictionary values)
-        {
-            var jediEndpoint = values["jediendpoint"] as string;
-
-            if (string.IsNullOrEmpty(jediEndpoint))
-            {
-                return new ValueTask<RouteValueDictionary>(new RouteValueDictionary()); 
-            }
-
-            var jedi = _jediBusiness.GetByEndpoint(jediEndpoint);
-
-            if (jedi == null)
-            {
-                return new ValueTask<RouteValueDictionary>(new RouteValueDictionary() {
-                    { "controller", "Starwars" },
-                    { "action", "JediNotFound" }
-                });
-            }
-
-            var route = new RouteValueDictionary()
+            return new ValueTask<RouteValueDictionary>(new RouteValueDictionary
             {
                 { "controller", "Starwars" },
-                { "action", "JediDetails" },
-                { "id", jedi.Id },
-            }; 
-
-           
-            return new ValueTask<RouteValueDictionary>(route);
+                { "action", "JediNotFound" }
+            });
         }
+
+        return new ValueTask<RouteValueDictionary>(new RouteValueDictionary
+        {
+            { "controller", "Starwars" },
+            { "action", "JediDetails" },
+            { "id", jedi.Id },
+        });
     }
 }

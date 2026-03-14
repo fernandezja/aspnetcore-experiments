@@ -1,6 +1,7 @@
 # aspnetcore-experiments
 Code Kata with ASP.NET Core (practicing, exploring, experimenting, testing and playing)
 
+[![CI](https://github.com/fernandezja/aspnetcore-experiments/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/fernandezja/aspnetcore-experiments/actions/workflows/ci.yml)
 
 
 | Example 	| Description 	|

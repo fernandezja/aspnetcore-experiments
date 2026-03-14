@@ -1,36 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Starwars.Jedis.Business.Interfaces;
 
-namespace WebApplication1.Controllers
+namespace WebApplication1.Controllers;
+
+public class StarwarsController(IJediBusiness jediBusiness) : Controller
 {
-    public class StarwarsController : Controller
+    public IActionResult JediDetails(int id)
     {
-        private IJediBusiness _jediBusiness;
+        if (id <= 0)
+            return BadRequest();
 
-        public StarwarsController(IJediBusiness jediBusiness)
-        {
-            _jediBusiness = jediBusiness;
-        }
+        var jedi = jediBusiness.GetById(id);
 
-        public IActionResult JediDetails(int id)
-        {
-            if (id <= 0)
-            {
-                return BadRequest();
-            }
-
-            var jedi = _jediBusiness.GetById(id);
-
-            return View(jedi);
-        }
-
-        public IActionResult JediNotFound()
-        {
-            return View();
-        }
+        return View(jedi);
     }
+
+    public IActionResult JediNotFound() => View();
 }

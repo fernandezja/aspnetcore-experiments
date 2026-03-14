@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="Starwars.Jedis.Business/Starwars.Jedis.Business.csproj" />
+  <Project Path="Starwars.Jedis.Entities/Starwars.Jedis.Entities.csproj" />
+  <Project Path="WebApplication1/WebApplication1.csproj" />
+</Solution>

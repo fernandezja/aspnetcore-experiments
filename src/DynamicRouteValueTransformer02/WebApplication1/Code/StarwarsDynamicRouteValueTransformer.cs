@@ -1,75 +1,74 @@
-﻿using Microsoft.AspNetCore.Http;
+using System;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.AspNetCore.Routing;
 using Starwars.Jedis.Business.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
-namespace WebApplication1.Code
+namespace WebApplication1.Code;
+
+public class StarwarsDynamicRouteValueTransformer(
+    IJediBusiness jediBusiness,
+    IItemLocalizerBusiness itemLocalizerBusiness) : DynamicRouteValueTransformer
 {
-    public class StarwarsDynamicRouteValueTransformer : DynamicRouteValueTransformer
+    public override ValueTask<RouteValueDictionary> TransformAsync(
+        HttpContext httpContext,
+        RouteValueDictionary values)
     {
-        private IJediBusiness _jediBusiness;
-        private IItemLocalizerBusiness _itemLocalizerBusiness;
-
-        public StarwarsDynamicRouteValueTransformer(IJediBusiness jediBusiness,
-                                                    IItemLocalizerBusiness itemLocalizerBusiness)
+        var language = values["language"] as string;
+        if (string.IsNullOrWhiteSpace(language))
         {
-            _jediBusiness = jediBusiness;
-            _itemLocalizerBusiness = itemLocalizerBusiness;
+            language = "en";
         }
 
-        public override ValueTask<RouteValueDictionary> TransformAsync(HttpContext httpContext, 
-                                                                       RouteValueDictionary values)
+        var endpoint = values["endpoint"] as string;
+        if (string.IsNullOrWhiteSpace(endpoint))
         {
-            var language = values["language"] as string;
-            if (string.IsNullOrEmpty(language))
-            {
-                language = "en";
-            }
-
-            var endpoint = values["endpoint"] as string;
-
-            if (string.IsNullOrEmpty(endpoint))
-            {
-                return new ValueTask<RouteValueDictionary>(values);
-            }
-
-            var endpointSegment = endpoint.Split("/");
-
-            var itemLocalizable = _itemLocalizerBusiness.GetByEndpoint(language, endpointSegment[0]);
-
-            if (itemLocalizable == null)
-            {
-                return new ValueTask<RouteValueDictionary>(new RouteValueDictionary() {
-                    { "controller", "Starwars" },
-                    { "action", "GroupNotFound" }
-                });
-            }
-
-            var jedi = _jediBusiness.GetByEndpoint(endpointSegment[1]);
-
-            if (jedi == null)
-            {
-                return new ValueTask<RouteValueDictionary>(new RouteValueDictionary() {
-                    { "controller", "Starwars" },
-                    { "action", "JediNotFound" }
-                });
-            }
-
-            var route = new RouteValueDictionary()
-            {
-                { "controller", "Starwars" },
-                { "action", "GroupDetails" },
-                { "language", language },
-                { "itemKey", itemLocalizable.Key },
-                { "jediId", jedi.Id }
-            }; 
-
-           
-            return new ValueTask<RouteValueDictionary>(route);
+            return new ValueTask<RouteValueDictionary>(values);
         }
+
+        var endpointSegments = endpoint.Split(
+            '/',
+            StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+        if (endpointSegments.Length < 2)
+        {
+            return new ValueTask<RouteValueDictionary>(CreateJediNotFoundRoute());
+        }
+
+        var itemLocalizable = itemLocalizerBusiness.GetByEndpoint(language, endpointSegments[0]);
+        if (itemLocalizable is null)
+        {
+            return new ValueTask<RouteValueDictionary>(CreateGroupNotFoundRoute());
+        }
+
+        var jedi = jediBusiness.GetByEndpoint(endpointSegments[1]);
+        if (jedi is null)
+        {
+            return new ValueTask<RouteValueDictionary>(CreateJediNotFoundRoute());
+        }
+
+        var route = new RouteValueDictionary
+        {
+            { "controller", "Starwars" },
+            { "action", "GroupDetails" },
+            { "language", language },
+            { "itemKey", itemLocalizable.Key },
+            { "jediId", jedi.Id }
+        };
+
+        return new ValueTask<RouteValueDictionary>(route);
     }
+
+    private static RouteValueDictionary CreateGroupNotFoundRoute() => new()
+    {
+        { "controller", "Starwars" },
+        { "action", "GroupNotFound" }
+    };
+
+    private static RouteValueDictionary CreateJediNotFoundRoute() => new()
+    {
+        { "controller", "Starwars" },
+        { "action", "JediNotFound" }
+    };
 }
