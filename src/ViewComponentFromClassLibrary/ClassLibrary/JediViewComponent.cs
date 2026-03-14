@@ -1,24 +1,16 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
 
-namespace ClassLibrary
+namespace ClassLibrary;
+
+public class JediViewComponent : ViewComponent
 {
-    public class JediViewComponent: ViewComponent
+    public JediViewComponent()
     {
+    }
 
-        public JediViewComponent()
-        {
-
-        }
-
-        public async Task<IViewComponentResult> InvokeAsync(string jediName)
-        {
-            var view = "JediCustomView";
-
-            return View(view, jediName);
-        }
-
-
+    public async Task<IViewComponentResult> InvokeAsync(string jediName)
+    {
+        var view = "JediCustomView";
+        return View(view, jediName);
     }
 }
